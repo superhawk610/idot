@@ -12,6 +12,18 @@ module Idot
     @tmux = false
     @filename = "idot.svg"
 
+    @@graph_color_scheme = "rdpu9"
+    @@graph_color = "1"
+    @@graph_style = [
+      "-Gpad=0.2",
+      "-Gbgcolor=none", # transparent
+      %(-Ncolorscheme=#{@@graph_color_scheme}),
+      %(-Ecolorscheme=#{@@graph_color_scheme}),
+      %(-Ncolor=#{@@graph_color}),
+      %(-Nfontcolor=#{@@graph_color}),
+      %(-Ecolor=#{@@graph_color}),
+    ]
+
     def initialize
       @svg = File.tempfile("out.svg", mode = "w")
       @png = File.tempfile("out.png", mode = "w")
@@ -23,7 +35,7 @@ module Idot
     end
 
     def run
-      Process.new("dot", ["-Tsvg"], input: STDIN, output: @svg, error: STDERR).wait
+      Process.new("dot", ["-Tsvg"].concat(@@graph_style), input: STDIN, output: @svg, error: STDERR).wait
       Process.new("rsvg-convert", ["-a", "-h", "300", @svg.path], output: @png, error: STDERR).wait
       png = File.read(@png.path)
 
